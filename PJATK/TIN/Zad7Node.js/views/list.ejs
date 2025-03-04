@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista Lekarzy</title>
+</head>
+<body>
+    <h1>Lista Lekarzy</h1>
+    <ul>
+        <% lekarze.forEach(lekarz => { %>
+            <li>
+                <%= lekarz.imie %> - <%= lekarz.lataDoswiadczenia %> lat doświadczenia</a>
+            </li>
+        <% }) %>
+    </ul>
+    <a href="/">Powrót do menu głównego</a>
+</body>
+</html>

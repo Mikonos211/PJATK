@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Główne</title>
+</head>
+<body>
+    <h1>Menu Główne</h1>
+    <ul>
+        <li><a href="/list">Lista lekarzy</a></li>
+        <li><a href="/add">Dodaj nowego lekarza</a></li>
+    </ul>
+    <h2>Wyświetl szczegóły lekarza</h2>
+    <form action="/details" method="GET">
+        <label for="id">Wprowadź ID lekarza:</label>
+        <input type="number" name="id" required>
+        <button type="submit">Wyświetl</button>
+    </form>
+</body>
+</html>
