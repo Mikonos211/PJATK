@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dodawanie nowego produktu</title>
+</head>
+<body>
+    <h1>Dodawanie nowego produktu do sklepu</h1>
+    <form action="/Dodaj" method="POST">
+        <div class="input-box">
+            <input type="text" name="nazwa" placeholder="Nazwa produktu" required>
+        </div>
+        <div class="input-box">
+            <input type="number" name="ilosc_dostepna" placeholder="Ilość dostępna" required>
+        </div>
+        <div class="input-box">
+            <input type="number" name="cena_dzienna" placeholder="Cena dzienna" required>
+        </div>
+        <div class="input-box">
+            <input type="text" name="stan" placeholder="Stan produktu" required>
+        </div>
+        <button type="submit">Dodaj produkt</button>
+    </form>
+</body>
+</html>
