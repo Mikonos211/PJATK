@@ -2,10 +2,10 @@ use [2019SBD]
 /*
 	Zadanie 1:
 Przy pomocy kursora przejrzyj wszystkie produkty (tabela T_Produkt) i zmodyfikuj ceny tak,
-aby produkty droøsze niø $2 stania≥y o 10%, a produkty taÒsze niø $1 podroøa≥y o 5%. Dla
-kaødego zmienionego rekordu wypisz informacjÍ: ÑCena {nazwa_produktu} zosta≥a zmieniona
-na: {nowa_cena}$î. Wykorzystaj pÍtlÍ WHILE i zmiennπ systemowπ @@Fetch_status. CenÍ
-zaokrπglij do 2 miejsc po przecinku.
+aby produkty dro≈ºsze ni≈º $2 stania≈Çy o 10%, a produkty ta≈Ñsze ni≈º $1 podro≈ºa≈Çy o 5%. Dla
+ka≈ºdego zmienionego rekordu wypisz informacjƒô: ‚ÄûCena {nazwa_produktu} zosta≈Ça zmieniona
+na: {nowa_cena}$‚Äù. Wykorzystaj pƒôtlƒô WHILE i zmiennƒÖ systemowƒÖ @@Fetch_status. Cenƒô
+zaokrƒÖglij do 2 miejsc po przecinku.
 */
 set Nocount on
 declare test cursor for 
@@ -24,9 +24,48 @@ begin
 	update T_Produkt
 	set cena = @cena
 	where nazwa = @nazwa
-	print 'Cena ' + @nazwa + 'zosta≥a zmieniona o ' + cast(@cena as varchar)
+	print 'Cena ' + @nazwa + 'zosta≈Ça zmieniona o ' + cast(@cena as varchar)
 
 	fetch next from test into @cena, @nazwa;
 end	
 close test
 Deallocate test
+	
+/*
+	Zadanie 2:
+Przer√≥b kod z zadania 1 na procedurƒô wykorzystujƒÖcƒÖ kursor tak, aby warto≈õci cen
+produkt√≥w do obni≈ºki i podwy≈ºki nie by≈Çy sta≈Çe, tylko by≈Çy parametrami procedury. Nie
+korzystaj z IF-a, zamiast tego u≈ºyj CASE.
+*/
+
+alter procedure ZmianyCen 
+	@WartoscDolna money, 
+	@WartoscGorna money
+as 
+begin
+declare Kursor cursor for
+select nazwa, 
+		case 
+		when cena < @WartoscDolna then ROUND(cena + (cena + 0.05), 2)
+		when cena > @WartoscGorna then ROUND(cena + (cena + 0.1), 2)
+		else cena
+		end
+from T_Produkt where cena not between @WartoscDolna and @WartoscGorna
+DECLARE @Nazwa Varchar(30), @Cena money;
+open Kursor;
+
+FETCH NEXT FROM Kursor INTO @Nazwa, @Cena;
+while @@FETCH_STATUS = 0
+begin	
+update T_Produkt
+set Cena = @cena
+where Nazwa =@nazwa
+
+PRINT('Cena ' + @Nazwa + ' zosta≈Ça zmieniona na: ' + CAST(@Cena AS Varchar(5)) + '$.')
+FETCH NEXT FROM Kursor INTO @Nazwa, @Cena;
+end
+CLOSE Kursor;
+DEALLOCATE Kursor;
+END;
+
+EXEC ZmianyCen 1, 2;
