@@ -197,3 +197,66 @@ begin
 end
 
 exec Dodaj 'dory' , 8.09, 'fish'
+
+/*
+	Zadanie 9:
+Napisz procedurę która zaktualizuje stanowisko danego pracownika. Procedura ma
+przypisać pracownika do nowego stanowiska z dzisiejszą datą, i jednocześnie wypisać go ze
+starego stanowiska również z dzisiejszą datą (wartość “Do” w tabeli T_Zatrudnienie). Jako
+argumenty procedura powinna przyjmować @Id_pracownika i @Id_stanowiska. Jeśli
+pracownik jest aktualnie przypisany na podane stanowisko, to nie dodajemy go ponownie
+tylko wpisujemy informacje „Pracownik jest już przypisany na to stanowisko”. Jeśli pracownik
+lub stanowisko o podanym id nie istnieje wypisujemy o tym informacje i kończymy procedurę.
+Stanowisko dla danego pracownika można zmieniać tylko raz dziennie, jeśli dzisiejsza data
+istnieje już w kolumnie „Do” w tabeli T_Zatrudnienie dla danego pracownika, wtedy nie
+aktualizujemy jego stanowiska i wypisujemy informacje: „Zmiany nie zostały zapisane,
+stanowisko można aktualizować tylko raz dziennie”. W procedurze wyłącz komunikat o
+liczbie wierszy, które brały udział w operacji (SET NOCOUNT ON).
+
+*/
+
+select *
+from T_Pracownik
+select *
+from T_Zatrudnienie
+
+delete from T_Zatrudnienie
+where Od = '2025-04-09'
+
+select *
+from T_Stanowisko
+
+select *
+from T_Pracownik
+join T_Zatrudnienie on T_Pracownik.id = T_Zatrudnienie.Pracownik
+join T_Stanowisko on T_Zatrudnienie.Stanowisko = T_Stanowisko.Id;
+
+alter procedure AktualizacjaStanowiska 
+	@Id_pracownika int,
+	@Id_stanowiska int
+as 
+begin
+set nocount on
+	declare @dotady date = getdate()
+	declare @aktualnieStanowisko int = (select Stanowisko from T_Zatrudnienie where Pracownik = @Id_pracownika and do is null) 
+	if @Id_pracownika in (select Pracownik from T_Zatrudnienie where Stanowisko = @Id_stanowiska and do is null)
+	print 'pracownik obejmuje już to stanowisko'
+	else if @Id_pracownika not in (select id from T_Pracownik)
+	print 'pracownik o takim id nie istnieje'
+	else if @Id_stanowiska not in (select id from T_Stanowisko)
+	print 'takie stanowisko nie istnieje'
+	else if @dotady = (select do from T_Zatrudnienie where Pracownik = @Id_pracownika)
+	print 'mozna zmieniac jedynie raz dziennie'
+	else
+	begin 
+	update T_Zatrudnienie
+	set do = @dotady
+	where Pracownik = @Id_pracownika and do is null
+	print 'wypisano z stanowiska'
+	insert into T_Zatrudnienie (Pracownik, Stanowisko, od, Do)
+	values (@Id_pracownika, @Id_stanowiska, @dotady, null)
+	print 'dodano nowego pracownika'
+	end	
+end
+
+exec AktualizacjaStanowiska 4, 2;
