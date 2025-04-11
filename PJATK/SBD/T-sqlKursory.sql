@@ -69,3 +69,91 @@ DEALLOCATE Kursor;
 END;
 
 EXEC ZmianyCen 1, 2;
+
+/*
+	Zadanie 3 a:
+Utwórz nowe zlecenie zaopatrzenia sklepu (tabela T_Zaopatrzenie) z dzisiejszą datą.
+Następnie, korzystając z kursora, przypisz do tego zlecenia wszystkie produkty, które
+sprzedały się w więcej niż 10 sztukach w grudniu 2022. W T_ZaopatrzenieProdukt jako ilość
+podaj dwukrotność sprzedanej ilości sztuk danego produktu z grudnia 2022. Po dodaniu
+każdego produktu wypisz informację: „Zamówiono produkt o ID= {id} w ilości= {ilość}”.
+*/
+insert into T_Zaopatrzenie ("data") values (GETDATE())
+
+select * 
+from T_ZaopatrzenieProdukt;
+
+select *
+from T_Produkt
+join T_ListaProduktow on T_Produkt.Id = T_ListaProduktow.Produkt
+join T_Zakup on T_Zakup.Id = T_ListaProduktow.Zakup
+
+Select * 
+from T_Produkt
+join T_ZaopatrzenieProdukt on T_Produkt.Id = T_ZaopatrzenieProdukt.produkt
+join T_Zaopatrzenie on T_Zaopatrzenie.id = T_ZaopatrzenieProdukt.Zaopatrzenie
+
+DECLARE Zad3 CURSOR FOR
+SELECT Produkt, ilosc, "data"
+FROM T_ListaProduktow
+JOIN T_Zakup ON T_ListaProduktow.Zakup = T_Zakup.Id
+where  ilosc >= 10 AND MONTH(data) = 12 AND YEAR(data) = 2022
+
+DECLARE @produkt INT, @ilosc INT, @data DATE, @idZaop INT, @iloscZamowienia INT;
+
+OPEN Zad3;
+
+FETCH NEXT FROM Zad3 INTO @produkt, @ilosc, @data;
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    IF @ilosc >= 10 AND MONTH(@data) = 12 AND YEAR(@data) = 2022
+    BEGIN
+        SET @idZaop = (SELECT max(id) FROM T_Zaopatrzenie);
+        SET @iloscZamowienia = @ilosc * 2;
+
+        INSERT INTO T_ZaopatrzenieProdukt (Zaopatrzenie, Produkt, Ilosc)
+        VALUES (@idZaop, @produkt, @iloscZamowienia);
+
+        PRINT 'Zamówiono produkt o ID=' + CAST(@produkt AS VARCHAR(10)) + ' w ilości=' + CAST(@iloscZamowienia AS VARCHAR(10));
+    END
+
+    FETCH NEXT FROM Zad3 INTO @produkt, @ilosc, @data;
+END
+
+CLOSE Zad3;
+DEALLOCATE Zad3;
+
+/*
+	Zadanie 3 b:
+Nie korzystaj z IF-a.
+Najpierw należy utworzyć nowy rekord w tabeli T_Zaopatrzenie i przechwycić id używając
+zmiennej systemowej @@Identity (PK ma właściwość Identity). Następnie przy użyciu
+kursora należy wstawić do tabeli T_ZaopatrzenieProdukt rekordy dla produktów, które nas
+interesują.
+*/
+set nocount on 
+Declare zaopatrzenie cursor for
+select produkt, SUM(ilosc) as ilosc
+from  T_ListaProduktow 
+join T_Zakup on T_ListaProduktow.Zakup = T_Zakup.id
+where  MONTH("data") = 12 AND YEAR("data") = 2022 
+group by Produkt
+having sum(ilosc) > 10;
+
+insert into T_Zaopatrzenie ("data" ) values (GETDATE())
+declare @prod int, @ile int, @idZaopatrzenia int = @@Identity
+
+open zaopatrzenie;
+fetch next from zaopatrzenie into @prod, @ile
+while @@FETCH_STATUS = 0
+begin
+	insert into T_ZaopatrzenieProdukt (Zaopatrzenie, Produkt, Ilosc)
+	values (@idZaopatrzenia, @prod, @ile*2)
+	print 'Zamówiono produkt o ID = ' + cast(@idZaopatrzenia as varchar) +
+	' w ilosci =' + cast(@ile as varchar)
+
+fetch next from zaopatrzenie into @prod, @ile
+end
+close zaopatrzenie;
+deallocate zaopatrzenie;
