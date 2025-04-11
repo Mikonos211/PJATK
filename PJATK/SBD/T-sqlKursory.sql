@@ -157,3 +157,104 @@ fetch next from zaopatrzenie into @prod, @ile
 end
 close zaopatrzenie;
 deallocate zaopatrzenie;
+
+/*
+	Zadanie 4
+Dodaj kolumnę „Bonus” typu money z opcją NULL do tabeli T_Pracownik. Następnie,
+korzystając z kursora, przypisz wartość bonusu każdemu aktualnie zatrudnionemu
+pracownikowi. Bonus jest wyliczany na podstawie stażu w miesiącach i wynosi: pensja *
+ilość_miesięcy/100. Jest on przyznawany tylko osobom, które pracowały co najmniej 6
+miesięcy i nie może wynieść więcej niż 30% pensji. Stwórz perspektywę przechowującą
+id_pracownika i jego staż w miesiącach, która będzie wykorzystywana przez kursor. Po
+dodaniu bonusu wypisz informację: „Pracownik od id= {id} ma przypisany bonus w
+wysokości= {bonus} % pensji”.
+*/
+
+alter table T_pracownik
+add bonus money null
+
+insert into T_Pracownik (Id,Pensja, Szef, bonus)
+values (8,5000, null, null)
+insert into T_Zatrudnienie(Pracownik, Stanowisko, od, Do)
+values (8, 1, '2025-01-01', null)
+select *
+from T_Pracownik;
+
+select *
+from T_Pracownik
+join T_Zatrudnienie on T_Pracownik.id = T_Zatrudnienie.Pracownik
+
+
+
+select *
+from T_Zatrudnienie
+
+--Wersja bez Widoku
+declare WyliczBonus cursor for
+select Pracownik,  DATEDIFF(MONTH, MIN(Od), GETDATE())
+from T_Pracownik
+join T_Zatrudnienie on T_Pracownik.id = T_Zatrudnienie.Pracownik
+where do is null
+GROUP BY  Pracownik
+
+declare @idPracownika int ,@dlugoscStarzu int, @wysokoscBonusu money
+
+open WyliczBonus;
+
+fetch next from WyliczBonus into @idPracownika, @dlugoscStarzu
+
+while @@FETCH_STATUS = 0
+begin
+	if @dlugoscStarzu < 6
+	begin 
+		print 'Za krotki starz na procentowy bonus'
+	end
+	else
+	begin
+		set @wysokoscBonusu = (select pensja from T_Pracownik where id = @idPracownika) *  (CAST(@dlugoscStarzu AS decimal(5,2)) /100) 
+		if @wysokoscBonusu >  (select pensja from T_Pracownik where id = @idPracownika) * 0.3
+			begin
+			set @wysokoscBonusu = (select pensja from T_Pracownik where id = @idPracownika) * 0.3
+			end	
+		UPDATE T_Pracownik
+		SET bonus = @wysokoscBonusu
+		where id = @idPracownika;
+	end
+	fetch next from WyliczBonus into @idPracownika, @dlugoscStarzu
+end
+close WyliczBonus
+deallocate WyliczBonus
+
+
+--wersja z widokiem
+CREATE VIEW StazPracownikow(Pracownik, Staz) 
+as
+select Pracownik,  DATEDIFF(MONTH, MIN(Od), GETDATE()) 
+from T_Pracownik
+join T_Zatrudnienie on T_Pracownik.id = T_Zatrudnienie.Pracownik
+where do is null
+GROUP BY  Pracownik
+ 
+declare BonusDlaPracownika cursor for
+select Pracownik, 
+	case 
+		when Staz < 5 then null
+		when Staz > 30 then 30
+		else Staz
+	end as bonus
+	from StazPracownikow
+
+declare @idPracownika2 int ,  @wysokoscBonusu2 money
+
+open BonusDlaPracownika;
+
+fetch next from BonusDlaPracownika into @idPracownika2, @wysokoscBonusu2;
+while @@FETCH_STATUS = 0
+	begin
+		update T_Pracownik
+		set bonus = ROUND(pensja * @wysokoscBonusu2/100, 2)
+		where Id = @idPracownika2
+	fetch next from BonusDlaPracownika into @idPracownika2, @wysokoscBonusu2;
+	end
+close BonusDlaPracownika;
+deallocate BonusDlaPracownika;
