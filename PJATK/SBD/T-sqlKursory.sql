@@ -258,3 +258,55 @@ while @@FETCH_STATUS = 0
 	end
 close BonusDlaPracownika;
 deallocate BonusDlaPracownika;
+
+/*
+	Zadanie 5:
+Dodaj kolumnę „Ulubiony_produkt” typu int z opcją NULL do tabeli T_Osoba. Następnie,
+korzystając z kursora, jako wartość ulubionego produktu przypisz produkt, który dana osoba
+kupiła w największej ilości we wszystkich zakupach. Po dodaniu produktu wypisz informację:
+„Dodano ulubiony produkt o id= {id} dla osoby o id= {id}”.
+
+*/
+select *
+from T_Osoba;
+
+
+declare dodajulubiony_produkt cursor for
+SELECT 
+    T_Osoba.Id, 
+    T_Osoba.Imie, 
+    SUM(T_ListaProduktow.Ilosc) AS Ilosc, 
+    T_Produkt.Id AS ProduktId
+FROM 
+    T_Osoba
+JOIN T_Zakup ON T_Osoba.Id = T_Zakup.Klient
+JOIN T_ListaProduktow ON T_Zakup.Id = T_ListaProduktow.Zakup
+JOIN T_Produkt ON T_Produkt.Id = T_ListaProduktow.Produkt
+WHERE 
+    T_Produkt.Id = (
+        SELECT TOP(1) T_ListaProduktow.Produkt 
+        FROM T_Zakup 
+        JOIN T_ListaProduktow ON T_Zakup.Id = T_ListaProduktow.Zakup
+        WHERE T_Zakup.Klient = T_Osoba.Id
+        GROUP BY T_ListaProduktow.Produkt
+        ORDER BY SUM(T_ListaProduktow.Ilosc) DESC
+    )
+GROUP BY 
+    T_Osoba.Id, T_Osoba.Imie, T_Produkt.Id;
+
+set nocount on
+declare @OsobaID int, @imieOsoba varchar(50), @IloscPro int, @ProduktID int;
+open dodajulubiony_produkt
+Fetch next from dodajulubiony_produkt into  @OsobaID , @imieOsoba , @IloscPro , @ProduktID ;
+WHILE @@Fetch_status = 0
+begin
+update T_Osoba
+set Ulubiony_produkt = @ProduktID
+where id = @OsobaID
+PRINT('Dodano ulubiony produkt o id= ' + CAST(@ProduktID AS Varchar(5)) + '
+dla osoby o id= ' + CAST(@OsobaID AS Varchar(5)));
+Fetch next from dodajulubiony_produkt into  @OsobaID , @imieOsoba , @IloscPro , @ProduktID ;
+end;
+close dodajulubiony_produkt;
+DEALLOCATE dodajulubiony_produkt; 
+
