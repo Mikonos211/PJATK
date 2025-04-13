@@ -77,3 +77,31 @@ END CATCH;
 end
 
 INSERT INTO T_Produkt(Id, Nazwa, Cena, Kategoria) VALUES (11, 'Cucumber', 0.25, 2)
+
+
+/*
+	Zadanie 5:
+Przerób wyzwalacz z zad 4 na INSTEAD OF INSERT, który będzie działać tak samo.
+*/
+
+create Trigger Zad5
+on T_osoba
+instead of insert 
+as
+BEGIN
+declare @ID int, @imie varchar(50) , @nazwisko varchar(50);
+select @ID = id ,@imie = Imie ,@nazwisko = nazwisko from inserted;
+if @nazwisko in (select nazwisko from T_osoba WHERE id <> @Id)
+begin
+	raiserror('takie nazwisko juz istnieje' , 16, 1);
+	rollback;
+end
+ELSE
+begin
+	insert into T_Osoba (Id, Imie, Nazwisko, Ulubiony_produkt) 
+	values (@ID, @imie, @nazwisko, null)
+	print @nazwisko + 'zostal dodany'
+end
+end
+
+INSERT INTO T_Osoba(Id, Imie, Nazwisko) VALUES (14, 'Trevor', 'pawel')
