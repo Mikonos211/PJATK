@@ -48,3 +48,32 @@ WHERE zakup = 55 AND produkt = 5;
 
 DELETE FROM T_ListaProduktow
 WHERE zakup = 55 AND produkt = 5;
+
+/*
+	Zadanie 3:
+Napisz wyzwalacz INSEAD OF INSERT dla tabeli T_Produkt, który będzie wypisywać:
+„Naruszono więzy klucza głównego, rekord nie został dodany” jeśli podany klucz główny już
+istnieje. W przeciwnym razie dodajemy rekord do tabeli wypisując informację: „{produkt}
+został dodany”. Nie korzystaj z IF-a, zamiast tego użyj TRY CATCH.
+*/
+select *
+from T_Produkt;
+
+alter trigger Zad3
+on T_Produkt
+instead of insert
+as 
+begin
+declare @id int, @nazwa varchar(50), @cena money, @kategoria int
+SELECT @id = id, @nazwa = nazwa, @cena = cena, @kategoria = kategoria FROM Inserted; 
+begin try
+INSERT INTO T_Produkt(Id, Nazwa, Cena, Kategoria) VALUES (@Id, @Nazwa, @Cena,
+@Kategoria);
+PRINT(@Nazwa + ' został dodany')
+END TRY
+BEGIN CATCH
+RAISERROR('Naruszono więzy klucza głównego, rekord nie został dodany', 16, 1)
+END CATCH;
+end
+
+INSERT INTO T_Produkt(Id, Nazwa, Cena, Kategoria) VALUES (11, 'Cucumber', 0.25, 2)
