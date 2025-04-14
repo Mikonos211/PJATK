@@ -105,3 +105,34 @@ end
 end
 
 INSERT INTO T_Osoba(Id, Imie, Nazwisko) VALUES (14, 'Trevor', 'pawel')
+
+/*
+	Zadanie 6
+Utwórz wyzwalacz AFTER, który po wstawieniu nowego pracownika w tabeli T_Pracownik
+automatycznie przypisze mu szefa (o id= 2) jeśli nie podamy tej wartości w instrukcji
+INSERT. Wykorzystaj w tym celu tabelę Inserted.
+Uwaga: W tym zadaniu używamy wyzwalacza jedynie w celach treningowych, ponieważ
+taką funkcjonalność najlepiej byłoby zrealizować zakładając ograniczenie DEFAULT na
+kolumnę „Szef” w następujący sposób:
+*/
+select *
+from T_pracownik
+SELECT id, pensja, szef FROM T_Pracownik WHERE id = 10;
+
+alter Trigger Zad6
+on T_Pracownik
+After insert
+as 
+begin
+declare @szef int, @id int
+select @id= id, @szef = Szef  from inserted
+if @szef is null
+begin 
+	update T_Pracownik
+	set Szef = 2
+	where Id = @id
+end	
+end
+
+INSERT INTO T_Pracownik(id, pensja) VALUES (10, 5555);
+DELETE FROM T_Pracownik WHERE id = 9;
