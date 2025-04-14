@@ -199,3 +199,55 @@ RAISERROR('Data "Do" nie może być wcześniejsza niż data "Od"',16,1);
 ROLLBACK;
 END;
 end
+
+/*
+	Zadanie 9:
+Napisz wyzwalacz FOR INSERT dla tabeli T_Zatrudnienie, który:
+• Nie pozwoli na ręczne przypisywanie wartości dla kolumny Do (czyli przy dodawaniu
+rekordu wartość Do powinna zostać pominięta)
+• Nie pozwoli na przypisanie pracownika na stanowisko na którym jest już aktualnie
+zatrudniony (czyli ma NULL w kolumnie Do dla tego samego stanowiska)
+• Nie pozwoli na przypisanie daty Od, która jest wcześniejsza niż jakakolwiek inna
+data Od lub Do dla danego pracownika
+• Wypisze pracownika ze starego stanowiska kiedy przypisujemy mu nowe (czyli
+zmieni Do dla starego stanowiska na datę przypisania nowego stanowiska)
+*/
+select *
+from T_Zatrudnienie
+where Pracownik = 4 and Stanowisko = 2
+
+create trigger Zad9
+on T_Zatrudnienie
+for insert
+as
+begin
+declare @pracownik int , @stanowsko int, @od date, @do date
+select @pracownik = pracownik, @stanowsko = stanowisko, @od = od, @do = do
+from inserted;
+
+if @do is not null
+begin 
+	raiserror('do powinno byc null podczas dodawania' 16, 1)
+	rollback
+end
+
+if @stanowsko in (select stanowisko from T_Zatrudnienie  WHERE pracownik = @Pracownik 
+      AND Od <> @Od 
+      AND Do IS NULL)
+begin
+	RAISERROR('Pracownik jest już aktualnie zatrudniony na dane stanowisko, rekord
+	nie został dodany',16,1);
+	rollback
+end
+else if @do < any (SELECT IIF(Do IS NULL, Od, Do) FROM T_Zatrudnienie WHERE
+pracownik = @pracownik)
+BEGIN
+RAISERROR('Data "Od" nie może być wcześniejsza niż inne daty "Od" i "Do" danego
+pracownika, rekord nie został dodany',16,1);
+ROLLBACK;
+END;
+ELSE
+UPDATE T_Zatrudnienie
+SET Do = @Od
+WHERE pracownik = @pracownik AND stanowisko <> @stanowsko AND Do IS NULL;
+END;
