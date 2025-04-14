@@ -167,3 +167,35 @@ begin
 	rollback
 end
 end
+	
+/*
+	Zadanie 8:
+Napisz wyzwalacz FOR UPDATE dla tabeli T_Zatrudnienie, który nie pozwoli na
+modyfikowanie wartości żadnej z kolumn z wyjątkiem kolumny Do. Dodatkowo kolumnę Do
+można modyfikować tylko wtedy gdy jej wartość jest NULLem i nie może mieć przypisanej
+daty Do wcześniejszej niż data Od
+*/
+select *
+from T_zatrudnienie
+
+create Trigger zad8
+on T_Zatrudnienie
+for update 
+as
+begin
+IF Update(pracownik) OR Update(stanowisko) OR UPDATE(od)
+begin 
+raiserror('nie wolno edytowac kolumn pracownik stanowisko i od', 16, 1)
+rollback
+end
+else if (select do from deleted) is null
+begin 
+	raiserror('w tym wierszu od jest null wiec lipa', 16, 1)
+	rollback
+end
+else if exists (select 1 from inserted where do < od)
+BEGIN
+RAISERROR('Data "Do" nie może być wcześniejsza niż data "Od"',16,1);
+ROLLBACK;
+END;
+end
