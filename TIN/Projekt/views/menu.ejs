@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Główne</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        *{
+   margin: 0;
+   padding: 0;
+   box-sizing: border-box;
+
+}
+
+body{
+    background-image: url(background.jpg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment:fixed ;
+    background-size: cover;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+.header {
+    min-height: 100vh;
+    width: 100%;
+    background-position: center;
+    background-size: cover;
+    position: relative;
+}
+nav{
+    display: flex;
+    padding: 2% 6%;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); 
+}
+nav img{
+    width: 150px;
+}
+.nav-links{
+    flex: 1;
+    text-align: right;
+}
+.nav-links ul li{
+    list-style: none;
+    display: inline-block;
+    padding: 8px 12px;
+    position: relative;
+    font-family: "Roboto", serif;
+    font-weight: 900;
+    font-style: normal;
+}
+.nav-links ul li a {
+    text-decoration: none;
+    color: black;
+}
+
+.nav-links ul li::after{
+    content: '';
+    width: 0%;
+    height: 2px;
+    background: #f8b500;
+    display: block;
+    margin: auto;
+    transition: 0.5s;
+
+}
+.nav-links ul li:hover::after{
+    width: 100%;
+}
+.text-box{
+    width: 90%;
+    color: black;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    
+    font-family: "Roboto", serif;
+    font-weight: 400;
+    font-style: italic;
+}
+.text-box p{
+    margin: 10px 0 40px;
+}
+
+.ProPrzycisk {
+    font-size: 18px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    display: inline-block;
+    text-align: center;
+    font-weight: bold;
+    padding: 0.7em 2em;
+    border: 3px solid #f8b500;
+    border-radius: 2px;
+    position: relative;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.1);
+    color: #f8b500;
+    text-decoration: none;
+    transition: 0.3s ease all;
+    z-index: 1;
+}
+
+.ProPrzycisk::before {
+    transition: 0.5s all ease;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    right: 50%;
+    bottom: 0;
+    opacity: 0;
+    content: '';
+    background-color: #f8b500;
+    z-index: -1;
+}
+
+.ProPrzycisk:hover, .ProPrzycisk:focus {
+    color: white;
+}
+
+.ProPrzycisk:hover::before, .ProPrzycisk:focus::before {
+    transition: 0.5s all ease;
+    left: 0;
+    right: 0;
+    opacity: 1;
+}
+
+.ProPrzycisk:active {
+    transform: scale(0.9);
+}
+    </style>
+</head>
+
+<body class="homeClass">
+
+
+    <section class="header">
+        <nav>
+            <div class="nav-links">
+                <ul>
+                    <% if (isLoggedIn) { %>
+                        <li><a href="/account">Moje konto</a></li>
+                        <li><a href="/logout">Wyloguj się</a></li>
+                    <% } else { %>
+                        <li><a href="/login">Zaloguj się</a></li>
+                    <% } %>
+                    <li><a href="/oferta">Nasza oferta</a></li>
+                    <li><a href="/about">O Nas</a></li>
+                    <li><a href="/kontakt">Kontakt</a></li>
+                </ul>
+            </div>
+            
+        </nav>
+        
+        <div class="text-box">
+            <h1>FilmBox</h1>
+            <p>
+                Witaj w <strong>FilmBox</strong> – Twojej ulubionej wypożyczalni sprzętu filmowego!<br>
+                Oferujemy szeroki wybór profesjonalnego sprzętu filmowego, od kamer, przez oświetlenie,<br>
+                aż po akcesoria potrzebne do produkcji filmów. Nasza platforma umożliwia szybkie i<br>
+                wygodne wypożyczanie sprzętu online, dostosowanego do Twoich potrzeb.
+            </p>
+            
+            <a href="/oferta" class="ProPrzycisk">Oferta</a>
+        </div>
+    </section>
+</body>
+</html>

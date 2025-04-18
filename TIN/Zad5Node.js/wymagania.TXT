@@ -1,0 +1,7 @@
+1. Logowanie sie
+1a. Zadządzanie kontem
+2. Wybór usług medycznych
+2a. Wybór lekarza do tego zadanie
+2b. Wybór placówki
+3. System powiadomień
+4. System obsługuje opcje Administratora

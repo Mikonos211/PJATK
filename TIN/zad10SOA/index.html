@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dodawanie Osoby</title>
+</head>
+<body>
+  <h1>Dodaj nową osobe</h1>
+  <form action="http://localhost:3000/items" method="POST">
+    <label for="imie">Imie:</label><br>
+    <input type="text" id="imie" name="imie" required><br><br>
+  
+    <label for="wiek">Wiek:</label><br>
+    <input type="number" id="wiek" name="wiek" required><br><br>
+  
+    <button type="submit">Dodaj osobe</button>
+  </form>  
+</body>
+</html>
